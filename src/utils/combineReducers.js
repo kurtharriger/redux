@@ -2,6 +2,7 @@ import { ActionTypes } from '../createStore'
 import isPlainObject from './isPlainObject'
 import mapValues from './mapValues'
 import pick from './pick'
+import { getEffects, getState, withEffects, hasEffects } from './withEffects'
 
 /* eslint-disable no-console */
 
@@ -115,19 +116,12 @@ export default function combineReducers(reducers) {
         console.error(warningMessage)
       }
     }
+    var finalResult = Object.keys(finalReducers).reduce((acc, key) => {
+      let reducer = finalReducers[key]
+      let reducerResult = reducer(state[key], action)
+      return withEffects({...getState(acc), ...{[key]: getState(reducerResult)}}, [...getEffects(acc), ...getEffects(reducerResult)])
+    }, withEffects({}, []))
 
-    var hasChanged = false
-    var finalState = mapValues(finalReducers, (reducer, key) => {
-      var previousStateForKey = state[key]
-      var nextStateForKey = reducer(previousStateForKey, action)
-      if (typeof nextStateForKey === 'undefined') {
-        var errorMessage = getUndefinedStateErrorMessage(key, action)
-        throw new Error(errorMessage)
-      }
-      hasChanged = hasChanged || nextStateForKey !== previousStateForKey
-      return nextStateForKey
-    })
-
-    return hasChanged ? finalState : state
+    return finalResult
   }
 }

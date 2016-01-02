@@ -1,5 +1,6 @@
 export const INCREMENT_COUNTER = 'INCREMENT_COUNTER'
 export const DECREMENT_COUNTER = 'DECREMENT_COUNTER'
+export const CHANGE_FONT_COLOR = 'CHANGE_FONT_COLOR'
 
 export function increment() {
   return {
@@ -10,6 +11,13 @@ export function increment() {
 export function decrement() {
   return {
     type: DECREMENT_COUNTER
+  }
+}
+
+export function changeFontColor(color) {
+  return {
+    type: CHANGE_FONT_COLOR,
+    color: color
   }
 }
 

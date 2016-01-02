@@ -1,5 +1,5 @@
 import isPlainObject from './utils/isPlainObject'
-
+import * as Effects from './utils/withEffects'
 /**
  * These are private action types reserved by Redux.
  * For any unknown actions, you must return the current state.
@@ -30,7 +30,10 @@ export var ActionTypes = {
  * @returns {Store} A Redux store that lets you read the state, dispatch actions
  * and subscribe to changes.
  */
-export default function createStore(reducer, initialState) {
+const defaultEffectRunner = (effects, dispatch) => {
+  console.log('No effectRunner was provided.  The following effects will not be run:', effects)
+}
+export default function createStore(reducer, initialState, effectRunner = defaultEffectRunner) {
   if (typeof reducer !== 'function') {
     throw new Error('Expected the reducer to be a function.')
   }
@@ -116,14 +119,24 @@ export default function createStore(reducer, initialState) {
       throw new Error('Reducers may not dispatch actions.')
     }
 
+    var effects
     try {
       isDispatching = true
       currentState = currentReducer(currentState, action)
+      effects = Effects.getEffects(currentState)
+      currentState = Effects.getState(currentState)
+    } catch(err) {
+      console.log('caught err', err)
     } finally {
       isDispatching = false
     }
 
     listeners.slice().forEach(listener => listener())
+
+    if(effects.length) {
+      effectRunner(effects, dispatch)
+    }
+
     return action
   }
 
