@@ -4,8 +4,8 @@ import reducer from '../reducers'
 import { runEffects } from '../effects/counter.js'
 
 const createStoreWithMiddleware = applyMiddleware(
-  thunk
-)(createStore)
+  thunk,
+)((reducer, initialState) => createStore(reducer, initialState, runEffects))
 
 export default function configureStore(initialState) {
   //const store = createStoreWithMiddleware(reducer, initialState)

@@ -1,3 +1,4 @@
+import { getEffects, getState, withEffects, hasEffects } from './withEffects'
 /**
  * Composes single-argument functions from right to left.
  *
@@ -14,6 +15,11 @@ export default function compose(...funcs) {
     const last = funcs[funcs.length - 1]
     const rest = funcs.slice(0, -1)
 
-    return rest.reduceRight((composed, f) => f(composed), last(...args))
+    return rest.reduceRight((composed, f) => {
+      return (state) => {
+        let reducerResult = f(getState(state))
+        return withEffects({...getState(state), ...getState(reducerResult)}, [...getEffects(state), ...getEffects(reducerResult)])
+      }
+    }, last(...args))
   }
 }
